@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Master</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            color: white;
+        }
+
+        .btn-primary {
+            background: #667eea;
+        }
+
+        .btn-primary:active {
+            background: #5568d3;
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #764ba2;
+        }
+
+        .btn-secondary:active {
+            background: #653b8a;
+            transform: scale(0.98);
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .difficulty-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-btn {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            text-align: right;
+            transition: 0.2s;
+        }
+
+        .difficulty-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: right;
+            line-height: 1.5;
+        }
+
+        .answers-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .answer-option {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 1em;
+            text-align: right;
+            transition: 0.2s;
+        }
+
+        .answer-option:active {
+            transform: scale(0.98);
+        }
+
+        .answer-option.correct {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .answer-option.wrong {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .answer-option.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            width: 100%;
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .score-box {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .score-number {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .score-label {
+            color: #666;
+            font-size: 1em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            text-align: right;
+            margin: 15px 0;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            text-align: right;
+        }
+
+        .leaderboard-item:first-child {
+            border-top: 1px solid #eee;
+        }
+
+        .leaderboard-rank {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 40px;
+        }
+
+        .leaderboard-name {
+            flex: 1;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .leaderboard-score {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .center-text {
+            text-align: center;
+            color: #999;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- الشاشة الرئيسية -->
+    <div id="homeScreen" class="screen active">
+        <div class="card">
+            <h1>🎮 Quiz Master</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 25px;">لعبة الغاز والمسابقات</p>
+
+            <h2>اختر الصعوبة:</h2>
+            <div class="difficulty-options">
+                <button class="difficulty-btn active" data-difficulty="easy">🟢 سهل</button>
+                <button class="difficulty-btn" data-difficulty="medium">🟡 متوسط</button>
+                <button class="difficulty-btn" data-difficulty="hard">🔴 صعب</button>
+            </div>
+
+            <button class="btn btn-primary" onclick="startGame()">ابدأ اللعبة</button>
+            <button class="btn btn-secondary" onclick="showLeaderboard()">جدول المتصدرين</button>
+        </div>
+    </div>
+
+    <!-- شاشة اللعبة -->
+    <div id="gameScreen" class="screen">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="text-align: center;">
+                    <div class="timer" id="timer">30</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="color: #667eea; font-weight: bold;">النقاط</div>
+                    <div style="font-size: 1.5em; color: #667eea; font-weight: bold;" id="score">0</div>
+                </div>
+            </div>
+
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div style="text-align: center; color: #999; margin-bottom: 15px;" id="questionCount">السؤال 1 من 10</div>
+
+            <h2 id="questionText" style="margin-bottom: 20px;"></h2>
+
+            <div class="answers-list" id="answersContainer"></div>
+
+            <button class="btn btn-danger" onclick="quitGame()">إنهاء اللعبة</button>
+        </div>
+    </div>
+
+    <!-- شاشة النتائج -->
+    <div id="resultsScreen" class="screen">
+        <div class="card">
+            <h1>🎉 انتهت اللعبة!</h1>
+
+            <div class="score-box">
+                <div class="score-label">نقاطك</div>
+                <div class="score-number" id="finalScore">0</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="correctCount">0</div>
+                    <div class="stat-label">✅ صحيح</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="wrongCount">0</div>
+                    <div class="stat-label">❌ خاطئ</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="skippedCount">0</div>
+                    <div class="stat-label">⏭️ متخطي</div>
+                </div>
+            </div>
+
+            <input type="text" id="playerName" placeholder="أدخل اسمك">
+
+            <button class="btn btn-primary" onclick="saveScore()">حفظ النتيجة</button>
+            <button class="btn btn-secondary" onclick="startGame()">لعب مرة أخرى</button>
+            <button class="btn btn-secondary" onclick="goHome()">الرئيسية</button>
+        </div>
+    </div>
+
+    <!-- شاشة جدول المتصدرين -->
+    <div id="leaderboardScreen" class="screen">
+        <div class="card">
+            <h1>🏆 جدول المتصدرين</h1>
+            <div id="leaderboardList"></div>
+            <button class="btn btn-primary" onclick="goHome()">الرئيسية</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = {
+            easy: [
+                {q: "كم عدد قارات العالم؟", a: ["5", "6", "7", "8"], c: 2},
+                {q: "ما أكبر كوكب؟", a: ["زحل", "المشتري", "أورانوس", "نبتون"], c: 1},
+                {q: "كم عدد أيام السنة؟", a: ["360", "364", "365", "366"], c: 2},
+                {q: "عاصمة السعودية؟", a: ["جدة", "الرياض", "الدمام", "الخبر"], c: 1},
+                {q: "كم أركان الإسلام؟", a: ["3", "4", "5", "6"], c: 2},
+                {q: "أطول نهر؟", a: ["النيل", "الأمازون", "الدانوب", "الفرات"], c: 0},
+                {q: "كم لون قوس قزح؟", a: ["5", "6", "7", "8"], c: 2},
+                {q: "أكبر محيط؟", a: ["الأطلسي", "الهادي", "الهندي", "المتجمد"], c: 1},
+                {q: "كم فقرة في العمود الفقري؟", a: ["30", "33", "35", "40"], c: 1},
+                {q: "أصلب مادة طبيعية؟", a: ["الحديد", "الماس", "الياقوت", "الزمرد"], c: 1},
+            ],
+            medium: [
+                {q: "دول الخليج؟", a: ["4", "5", "6", "7"], c: 2},
+                {q: "أصغر دولة؟", a: ["موناكو", "الفاتيكان", "سان مارينو", "لايختنشتاين"], c: 1},
+                {q: "عظام الجسم؟", a: ["186", "206", "226", "246"], c: 1},
+                {q: "مخترع المصباح؟", a: ["تسلا", "إديسون", "فاراداي", "بيرد"], c: 1},
+                {q: "سور القرآن؟", a: ["100", "110", "114", "120"], c: 2},
+                {q: "أعمق نقطة محيط؟", a: ["بويرتو", "جاوة", "مارياناس", "تونجا"], c: 2},
+                {q: "دول أوروبا؟", a: ["25", "27", "29", "31"], c: 1},
+                {q: "أكبر جهاز في الجسم؟", a: ["الكبد", "الجلد", "الدماغ", "القلب"], c: 1},
+                {q: "لغات الأمم المتحدة؟", a: ["4", "5", "6", "7"], c: 2},
+                {q: "أسرع حيوان؟", a: ["الحصان", "الفهد", "الأرنب", "الغزال"], c: 1},
+            ],
+            hard: [
+                {q: "العنصر Au هو؟", a: ["فضة", "ذهب", "ألومنيوم", "زرنيخ"], c: 1},
+                {q: "حروف اللغة العربية؟", a: ["26", "28", "30", "32"], c: 1},
+                {q: "سرعة الضوء؟", a: ["250000", "299792", "350000", "400000"], c: 1},
+                {q: "أيام السنة الهجرية؟", a: ["354", "355", "365", "366"], c: 0},
+                {q: "أثقل معدن؟", a: ["رصاص", "بلاتين", "إيريديوم", "أسمنيوم"], c: 2},
+                {q: "مفاصل الجسم؟", a: ["206", "250", "280", "300"], c: 1},
+                {q: "من حسب محيط الأرض؟", a: ["أرسطو", "إراتوسثينس", "بطليموس", "ابن سينا"], c: 1},
+                {q: "أقوى حمض؟", a: ["الكبريتيك", "الهيدروفلوريك", "الفلوريك", "الكلوريدريك"], c: 2},
+                {q: "طبقات الغلاف الجوي؟", a: ["4", "5", "6", "7"], c: 1},
+                {q: "أقرب كوكب للشمس؟", a: ["الزهرة", "عطارد", "الأرض", "المريخ"], c: 1},
+            ]
+        };
+
+        let game = {
+            current: 0,
+            score: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0,
+            questions: [],
+            difficulty: "easy",
+            time: 30,
+            timer: null,
+        };
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function setDifficulty(diff) {
+            game.difficulty = diff;
+            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function startGame() {
+            game.current = 0;
+            game.score = 0;
+            game.correct = 0;
+            game.wrong = 0;
+            game.skipped = 0;
+            game.questions = [...questions[game.difficulty]].sort(() => Math.random() - 0.5);
+            
+            showScreen('gameScreen');
+            loadQuestion();
+            startTimer();
+        }
+
+        function loadQuestion() {
+            const q = game.questions[game.current];
+            document.getElementById('questionText').textContent = q.q;
+            document.getElementById('questionCount').textContent = `السؤال ${game.current + 1} من ${game.questions.length}`;
+            
+            const progress = ((game.current + 1) / game.questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            const answers = [...q.a].sort(() => Math.random() - 0.5);
+            const correctIndex = answers.indexOf(q.a[q.c]);
+
+            document.getElementById('answersContainer').innerHTML = answers.map((answer, i) => `
+                <button class="answer-option" onclick="selectAnswer(${i}, ${correctIndex})">
+                    ${answer}
+                </button>
+            `).join('');
+        }
+
+        function selectAnswer(selected, correct) {
+            const buttons = document.querySelectorAll('.answer-option');
+            buttons.forEach(b => b.classList.add('disabled'));
+            
+            if (selected === correct) {
+                buttons[selected].classList.add('correct');
+                game.correct++;
+                game.score += 10 + Math.max(0, game.time - 5);
+            } else {
+                buttons[selected].classList.add('wrong');
+                buttons[correct].classList.add('correct');
+                game.wrong++;
+            }
+
+            document.getElementById('score').textContent = game.score;
+            
+            setTimeout(() => {
+                game.current++;
+                if (game.current < game.questions.length) {
+                    loadQuestion();
+                    game.time = 30;
+                } else {
+                    endGame();
+                }
+            }, 1500);
+        }
+
+        function startTimer() {
+            clearInterval(game.timer);
+            game.time = 30;
+            game.timer = setInterval(() => {
+                game.time--;
+                document.getElementById('timer').textContent = game.time;
+                document.getElementById('timer').style.color = game.time <= 5 ? '#ef4444' : '#667eea';
+                
+                if (game.time <= 0) {
+                    game.wrong++;
+                    game.current++;
+                    if (game.current < game.questions.length) {
+                        loadQuestion();
+                        game.time = 30;
+                    } else {
+                        endGame();
+                    }
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(game.timer);
+            document.getElementById('finalScore').textContent = game.score;
+            document.getElementById('correctCount').textContent = game.correct;
+            document.getElementById('wrongCount').textContent = game.wrong;
+            document.getElementById('skippedCount').textContent = game.skipped;
+            showScreen('resultsScreen');
+        }
+
+        function quitGame() {
+            clearInterval(game.timer);
+            endGame();
+        }
+
+        function saveScore() {
+            const name = document.getElementById('playerName').value.trim();
+            if (!name) {
+                alert('أدخل اسمك!');
+                return;
+            }
+
+            let scores = JSON.parse(localStorage.getItem('scores') || '[]');
+            scores.push({
+                name: name,
+                score: game.score,
+                difficulty: game.difficulty,
+                date: new Date().toLocaleDateString('ar-SA')
+            });
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem('scores', JSON.stringify(scores.slice(0, 50)));
+            
+            alert('✅ تم الحفظ!');
+            goHome();
+        }
+
+        function showLeaderboard() {
+            let scores = JSON.parse(localStorage.getItem('scores') || '[]');
+            const html = scores.length === 0 
+                ? '<div class="center-text">لا توجد نتائج حتى الآن</div>'
+                : scores.slice(0, 20).map((s, i) => `
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-score">${s.score}</div>
+                        <div class="leaderboard-name">${s.name}</div>
+                        <div class="leaderboard-rank">#${i + 1}</div>
+                    </div>
+                `).join('');
+            
+            document.getElementById('leaderboardList').innerHTML = html;
+            showScreen('leaderboardScreen');
+        }
+
+        function goHome() {
+            clearInterval(game.timer);
+            document.getElementById('playerName').value = '';
+            showScreen('homeScreen');
+        }
+    </script>
+
+</body>
+</html>
